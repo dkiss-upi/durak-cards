@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#09291f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Дурак PRO — учёт карт</title>
+<style>
+:root{color-scheme:dark;--bg:#071d17;--felt:#0d3829;--felt2:#124633;--gold:#e8c77a;--cream:#fff9e9;--muted:#b5c8bd;--line:#2a5b47;--red:#d94e5d;--green:#4fd29a;--blue:#70a9ff}
+*{box-sizing:border-box}
+html{background:var(--bg);scroll-behavior:smooth}
+body{margin:0;background:radial-gradient(ellipse at 50% -10%,#1a503b 0,#09271e 45%,#061811 100%);color:var(--cream);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+body,button,select,input,.panel,.hero,.stat,.cards-panel,.possible-box{transition:background-color .22s ease,border-color .22s ease,box-shadow .22s ease}
+button{touch-action:manipulation;transition:transform .16s cubic-bezier(.2,.8,.2,1),filter .18s ease,box-shadow .18s ease,background-color .2s ease,border-color .2s ease}
+button:active{transform:scale(.965);filter:brightness(1.12)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+@media (hover:hover){button:hover{filter:brightness(1.09)}.action-btn:hover,.deck-select button:hover{box-shadow:0 5px 18px #0003;transform:translateY(-1px)}}
+@keyframes soft-rise{from{opacity:0;transform:translateY(7px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes number-pop{0%{transform:scale(.92);opacity:.65}60%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+@keyframes soft-glow{0%{box-shadow:0 0 0 #e8c77a00}45%{box-shadow:0 0 18px #e8c77a35}100%{box-shadow:0 0 0 #e8c77a00}}
+.stat strong.updated{animation:number-pop .28s ease-out}
+.card{view-transition-name:var(--card-transition-name,none)}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.22s}
+::view-transition-old(root){animation-timing-function:ease-out}
+::view-transition-new(root){animation-timing-function:ease-out}
+main{max-width:780px;margin:auto;padding:env(safe-area-inset-top) 13px calc(26px + env(safe-area-inset-bottom))}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:22px 4px 18px;gap:12px}
+.brand{display:flex;align-items:center;gap:11px}.logo{width:48px;height:48px;border:1px solid #d9bb6d;border-radius:14px;background:linear-gradient(145deg,#1a6245,#0a3022);display:grid;place-items:center;font-size:27px;box-shadow:0 5px 20px #0004}
+h1{font-size:23px;letter-spacing:.02em;margin:0}.subtitle{font-size:12px;color:var(--muted);margin-top:3px}
+.live{border:1px solid #3d765a;background:#103c2b;border-radius:999px;padding:7px 10px;font-size:11px;color:#9de8bd;white-space:nowrap}
+.hero{border:1px solid #367052;border-radius:20px;background:linear-gradient(135deg,#155039,#0d3425 75%);padding:16px;box-shadow:0 14px 35px #0002;position:relative;overflow:hidden}
+.hero:after{content:"♠";position:absolute;right:5px;top:-30px;font-size:150px;color:#ffffff08;pointer-events:none}
+.eyebrow{color:var(--gold);font-size:10px;font-weight:800;letter-spacing:.17em;text-transform:uppercase}
+.hero-title{font-size:20px;font-weight:800;margin:6px 0}.hero-copy{font-size:12px;line-height:1.45;color:#c2d8cb;max-width:470px}
+.deck-select{display:flex;gap:7px;margin-top:14px;position:relative;z-index:1}.deck-select button{flex:1}
+button,select,input{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.deck-select button,.action-btn{min-height:42px;border-radius:11px;border:1px solid #46775e;background:#103b2b;color:#e7f1e9;padding:10px 8px;font-size:13px;font-weight:750}
+.deck-select button.active{background:var(--gold);color:#18261c;border-color:var(--gold);box-shadow:0 3px 12px #e8c77a22;animation:soft-glow .55s ease}
+.section{margin-top:15px}.section-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 2px 9px}.section-head h2{font-size:14px;margin:0;letter-spacing:.01em}.mini-label{font-size:10px;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.stat{border:1px solid #24543f;border-radius:15px;background:linear-gradient(150deg,#103a2a,#0b2b20);padding:12px;min-height:83px;position:relative;overflow:hidden;animation:soft-rise .35s ease both}
+.stat-top{display:flex;justify-content:space-between;align-items:center;gap:6px}.stat-name{font-size:11px;color:#c1d4c8}.stat-icon{font-size:16px;opacity:.9}.stat strong{display:block;font-size:27px;line-height:1.1;margin-top:9px;font-variant-numeric:tabular-nums}.stat small{font-size:10px;color:#8eafa0}
+.stat.mine strong{color:var(--green)}.stat.opp strong{color:#ff8992}.stat.stock strong{color:var(--blue)}.stat.discard strong{color:var(--gold)}
+.panel{background:#0b2a20;border:1px solid #214c39;border-radius:17px;padding:14px}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field label{display:block;font-size:11px;color:#b5cabe;margin-bottom:6px}.field input,.field select{width:100%;border:1px solid #37634e;background:#071f17;color:#fff9e9;border-radius:10px;padding:11px;font-size:14px;min-height:43px;outline:none}.field input:focus,.field select:focus{border-color:var(--gold)}
+.note{font-size:11px;line-height:1.45;color:#a9c3b4;margin:10px 1px 0}
+.legend{display:flex;flex-wrap:wrap;gap:7px;margin:11px 0 0}.legend span{font-size:10px;color:#c0d0c6;background:#ffffff08;border:1px solid #ffffff0d;border-radius:999px;padding:6px 8px}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px}
+.cards-panel{padding:12px;background:linear-gradient(160deg,#10402e,#0b2c20);border:1px solid #2d6449;border-radius:18px;box-shadow:inset 0 1px #ffffff08}
+.instruction{font-size:11px;color:#aec7b7;line-height:1.45;margin:0 0 12px}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.card{min-width:0;position:relative;min-height:81px;padding:7px 3px 6px;border-radius:10px;border:1px solid #d7d4c9;background:linear-gradient(145deg,#fffdf6,#eee8d9);color:#18241e;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;box-shadow:0 3px 5px #0002;transition:transform .2s cubic-bezier(.2,.8,.2,1),border-color .22s ease,background .22s ease,box-shadow .22s ease;animation:soft-rise .22s ease both}
+.card:active{transform:scale(.94) rotate(-1deg);box-shadow:0 1px 2px #0002}.card .rank{font-size:17px;line-height:1.1;font-weight:850}.card .suit{font-size:24px;line-height:1.1}.card small{font-size:7px;font-weight:900;letter-spacing:.04em;min-height:9px;margin-top:3px;text-align:center}
+.card .rank.red,.card .suit.red{color:#c72f40}.card.mine{background:#d8f9e7;border:2px solid #40c88b}.card.opp{background:#ffe0e4;border:2px solid #e35d6a}.card.stock{background:#dbeaff;border:2px solid #6ca3ff}.card.played{background:#d4d8d5;border:2px dashed #79877f;opacity:.75}
+.card.trump:not(.played)::after{content:"КОЗЫРЬ";position:absolute;top:3px;right:3px;font-size:6px;letter-spacing:0;background:#f5d98f;color:#654a0b;border-radius:4px;padding:2px 3px}
+.validation{background:#4b3211;color:#ffe3a0;border:1px solid #8b682a;border-radius:10px;padding:10px;font-size:11px;line-height:1.4;margin-top:10px}
+.possible-box{border:1px solid #3a6049;border-radius:17px;padding:14px;background:linear-gradient(145deg,#103727,#0a271d)}
+.possible-intro{display:flex;align-items:center;gap:10px;margin-bottom:9px}.hint-icon{width:36px;height:36px;flex-shrink:0;display:grid;place-items:center;border-radius:11px;background:#e8c77a18;color:var(--gold);font-size:20px}.possible-intro h2{font-size:14px;margin:0 0 3px}.possible-intro p{font-size:10px;color:#a9c2b3;margin:0;line-height:1.35}
+.possible{display:flex;flex-wrap:wrap;gap:6px}.pill{background:#f8f3e6;color:#202b23;border-radius:7px;padding:6px 8px;font-size:12px;font-weight:750;box-shadow:0 2px 4px #0002}.pill.red{color:#c72f40}.empty{font-size:12px;color:#b7cabc;padding:6px 0}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.action-btn{background:#102f23;border-color:#2d5b43}.action-btn.primary{background:var(--gold);color:#17251b;border-color:var(--gold)}.action-btn.danger{color:#ff9ca3;border-color:#81414a}
+.footer{text-align:center;color:#769686;font-size:10px;line-height:1.5;padding:18px 10px 5px}
+@media(min-width:520px){.stats{grid-template-columns:repeat(4,minmax(0,1fr))}.grid{grid-template-columns:repeat(6,minmax(0,1fr))}.card{min-height:88px}.topbar{padding-top:28px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;}}
+</style>
+</head>
+<body>
+<main>
+ <div class="topbar">
+  <div class="brand"><div class="logo">🂡</div><div><h1>ДУРАК <span style="color:var(--gold)">PRO</span></h1><div class="subtitle">Умный учёт игральных карт</div></div></div>
+  <div class="live">● ЛИЧНЫЙ СЧЁТЧИК</div>
+ </div>
+ <section class="hero">
+  <div class="eyebrow">ТВОЯ ИГРА · ТВОЯ СТРАТЕГИЯ</div>
+  <div class="hero-title">Держи все карты под контролем</div>
+  <div class="hero-copy">Отмечай карты по ходу партии, следи за колодой и смотри, какие карты ещё могут остаться у соперника.</div>
+  <div class="deck-select" id="deckButtons"><button data-deck="24">24 карты</button><button data-deck="36" class="active">36 карт</button><button data-deck="52">52 карты</button></div>
+ </section>
+
+ <section class="section">
+  <div class="section-head"><h2>СОСТОЯНИЕ ПАРТИИ</h2><span class="mini-label">ОБНОВЛЯЕТСЯ АВТОМАТИЧЕСКИ</span></div>
+  <div class="stats">
+   <div class="stat mine"><div class="stat-top"><span class="stat-name">Мои карты</span><span class="stat-icon">✋</span></div><strong id="mineCount">0</strong><small>отмечено у тебя</small></div>
+   <div class="stat opp"><div class="stat-top"><span class="stat-name">Соперник</span><span class="stat-icon">👤</span></div><strong id="oppCount">0</strong><small>известные карты</small></div>
+   <div class="stat stock"><div class="stat-top"><span class="stat-name">В колоде</span><span class="stat-icon">🂠</span></div><strong id="stockCount">36</strong><small>не вышли в игру</small></div>
+   <div class="stat discard"><div class="stat-top"><span class="stat-name">Отбой</span><span class="stat-icon">♨</span></div><strong id="playedCount">0</strong><small>вышли из игры</small></div>
+  </div>
+  <div id="validation" class="validation" hidden></div>
+ </section>
+
+ <section class="section panel">
+  <div class="section-head"><h2>НАСТРОЙКИ ПАРТИИ</h2><span class="mini-label">ПО ЖЕЛАНИЮ</span></div>
+  <div class="controls">
+   <div class="field"><label for="myHand">Сколько карт у тебя?</label><input id="myHand" type="number" min="0" max="52" placeholder="Например, 6"></div>
+   <div class="field"><label for="oppHand">Сколько у соперника?</label><input id="oppHand" type="number" min="0" max="52" placeholder="Например, 6"></div>
+   <div class="field" style="grid-column:1/-1"><label for="trump">Козырная масть</label><select id="trump"><option value="">Выбрать козырь…</option><option value="♠">♠ Пики</option><option value="♥">♥ Червы</option><option value="♦">♦ Бубны</option><option value="♣">♣ Трефы</option></select></div>
+  </div>
+  <p class="note">Если знаешь фактическое число карт на руках, введи его — приложение предупредит, если оно не совпадает с отметками.</p>
+ </section>
+
+ <section class="section">
+  <div class="section-head"><h2>КАРТЫ В КОЛОДЕ</h2><span class="mini-label">НАЖМИ, ЧТОБЫ ОТМЕТИТЬ</span></div>
+  <div class="cards-panel">
+   <p class="instruction">Касайся карты несколько раз, чтобы менять статус: неизвестна → моя → соперника → колода → отбой → неизвестна.</p>
+   <div id="cards" class="grid"></div>
+   <div class="legend">
+    <span><i class="dot" style="background:#40c88b"></i>Мои</span><span><i class="dot" style="background:#e35d6a"></i>Соперника</span><span><i class="dot" style="background:#6ca3ff"></i>В колоде</span><span><i class="dot" style="background:#a7b0aa"></i>Отбой</span><span><i class="dot" style="background:#e8c77a"></i>Козырь</span>
+   </div>
+  </div>
+ </section>
+
+ <section class="section possible-box">
+  <div class="possible-intro"><div class="hint-icon">✦</div><div><h2>ВОЗМОЖНЫЕ КАРТЫ СОПЕРНИКА</h2><p id="possibleNote">Неизвестные карты, которые ещё не отмечены в других местах.</p></div></div>
+  <div id="possible" class="possible"></div>
+ </section>
+
+ <section class="section actions">
+  <button id="undo" class="action-btn">↶ Отменить отметку</button>
+  <button id="reset" class="action-btn danger">＋ Новая партия</button>
+ </section>
+ <div class="footer">ДУРАК PRO · Отметки хранятся в браузере на этом устройстве.<br>Подсказки показывают возможные карты, но не раскрывают закрытую руку соперника.</div>
+</main>
+<script>
+(() => {
+ const suits=["♠","♥","♦","♣"];
+ const rankSets={24:["9","10","В","Д","К","Т"],36:["6","7","8","9","10","В","Д","К","Т"],52:["2","3","4","5","6","7","8","9","10","В","Д","К","Т"]};
+ let deck=36,cards=[],history=[];
+ const $=id=>document.getElementById(id);
+ const storeKey=()=>`durakTracker-pro-v1-${deck}`;
+ function newDeck(){cards=rankSets[deck].flatMap(rank=>suits.map(suit=>({id:rank+suit,rank,suit,status:"unknown"})));history=[];render();save();}
+ function save(){try{localStorage.setItem(storeKey(),JSON.stringify({cards,myHand:$("myHand").value,oppHand:$("oppHand").value,trump:$("trump").value}));}catch(e){}}
+ function load(){try{const d=JSON.parse(localStorage.getItem(storeKey()));if(d&&Array.isArray(d.cards)&&d.cards.length===rankSets[deck].length){cards=d.cards;$("myHand").value=d.myHand||"";$("oppHand").value=d.oppHand||"";$("trump").value=d.trump||"";return true;}}catch(e){}return false;}
+ function cycle(card){history.push({id:card.id,status:card.status});const order=["unknown","mine","opponent","stock","played"];card.status=order[(order.indexOf(card.status)+1)%order.length];}
+ function render(){
+  $("cards").innerHTML="";
+  cards.forEach(card=>{
+   const b=document.createElement("button");
+   b.className="card "+({mine:"mine",opponent:"opp",stock:"stock",played:"played"}[card.status]||"")+(card.suit===$("trump").value?" trump":"");\n   b.style.setProperty("--card-transition-name", "card-"+card.rank.replace(/[^a-zA-Z0-9]/g,"r")+"-"+({"♠":"s","♥":"h","♦":"d","♣":"c"}[card.suit]));
+   const red=card.suit==="♥"||card.suit==="♦";
+   b.innerHTML=`<span class="rank ${red?"red":"black"}"></span><span class="suit ${red?"red":"black"}"></span><small></small>`;
+   b.children[0].textContent=card.rank;b.children[1].textContent=card.suit;
+   b.children[2].textContent=({mine:"МОЯ КАРТА",opponent:"СОПЕРНИК",stock:"В КОЛОДЕ",played:"ОТБОЙ"})[card.status]||"НЕИЗВЕСТНО";
+   b.setAttribute("aria-label",`${card.rank}${card.suit}: ${card.status}`);
+   b.addEventListener("click",()=>{
+    const update=()=>{cycle(card);render();save();};
+    if(document.startViewTransition && !window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+     document.startViewTransition(update);
+    }else{update();}
+   });$("cards").appendChild(b);
+  });
+  const count=s=>cards.filter(c=>c.status===s).length;
+  const mine=count("mine"),opp=count("opponent"),stock=count("stock"),played=count("played"),unknown=count("unknown");
+  [["mineCount",mine],["oppCount",opp],["stockCount",stock],["playedCount",played]].forEach(([id,value])=>{
+   const el=$(id),next=String(value);
+   if(el.textContent!==next){el.textContent=next;el.classList.remove("updated");void el.offsetWidth;el.classList.add("updated");}
+  });
+  const myN=$("myHand").value===""?null:Number($("myHand").value),oppN=$("oppHand").value===""?null:Number($("oppHand").value);
+  const issues=[];
+  if(myN!==null&&myN!==mine)issues.push(`У тебя указано ${myN} карт, но отмечено как твоих: ${mine}.`);
+  if(oppN!==null&&oppN!==opp)issues.push(`У соперника указано ${oppN} карт, но отмечено: ${opp}.`);
+  $("validation").hidden=issues.length===0;$("validation").textContent=issues.join(" ");
+  const candidates=cards.filter(c=>c.status==="unknown");
+  let note=`Неизвестных карт-кандидатов: ${candidates.length}.`;
+  if(oppN!==null)note+=` На руке соперника по твоему счёту ${oppN} карт.`;
+  note+=" Карты, отмеченные как твои, в колоде или в отбое, исключены.";
+  $("possibleNote").textContent=note;$("possible").innerHTML="";
+  candidates.forEach(c=>{const p=document.createElement("span");p.className="pill "+((c.suit==="♥"||c.suit==="♦")?"red":"");p.textContent=c.rank+c.suit;$("possible").appendChild(p);});
+  if(!candidates.length){const e=document.createElement("div");e.className="empty";e.textContent="Все карты уже отмечены."; $("possible").appendChild(e);}
+ }
+ document.querySelectorAll("[data-deck]").forEach(b=>b.addEventListener("click",()=>{
+  deck=Number(b.dataset.deck);document.querySelectorAll("[data-deck]").forEach(x=>x.classList.toggle("active",x===b));
+  $("myHand").value="";$("oppHand").value="";$("trump").value="";if(!load())newDeck();else{history=[];render();}
+ }));
+ ["myHand","oppHand"].forEach(id=>$(id).addEventListener("input",()=>{const v=Number($(id).value);if($(id).value!==""&&v>deck)$(id).value=String(deck);render();save();}));
+ $("trump").addEventListener("change",()=>{render();save();});
+ $("undo").addEventListener("click",()=>{const last=history.pop();if(!last)return;const c=cards.find(x=>x.id===last.id);if(c)c.status=last.status;render();save();});
+ $("reset").addEventListener("click",()=>{if(confirm("Начать новую партию и убрать все отметки?")){localStorage.removeItem(storeKey());$("myHand").value="";$("oppHand").value="";$("trump").value="";newDeck();}});
+ if(!load())newDeck();else render();
+})();
+</script>
+</body>
+</html>
